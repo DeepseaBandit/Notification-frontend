@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // Use environment variable with fallback to hardcoded API URL for production
-const API_URL = process.env.REACT_APP_API_URL || 'https://notification-backend-uaif.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function NotificationApp() {
   const [activeTab, setActiveTab] = useState("email");
