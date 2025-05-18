@@ -306,11 +306,38 @@ export default function NotificationApp() {
       <h1 className="text-3xl font-bold text-center mb-6">Notification System</h1>
       
       <div className="mb-4 text-center">
-        <span className="text-sm text-gray-500">
-          Connected to API: {API_URL}
+          <span className="text-sm text-black-500">
+          Connected to API: <a 
+            href={API_URL} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500 underline hover:text-blue-700"
+          >
+            {API_URL}
+          </a>
         </span>
-        <div className="text-sm text-gray-500 mt-1">
+        <div className="text-sm text-black-500 mt-1">
           Made by Snehodeep Das Roll 22052768
+        </div>
+        <div className="text-sm text-black-500 mt-1">
+          Backend Github link - <a 
+            href="https://github.com/DeepseaBandit/Notification-backend.git" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className=" text-blue-500 underline hover:text-blue-700"
+          >
+            https://github.com/DeepseaBandit/Notification-backend.git
+          </a>
+        </div>
+        <div className="text-sm text-black-500 mt-1">
+          Frontend Github link - <a 
+            href="https://github.com/DeepseaBandit/Notification-frontend.git" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500 underline hover:text-blue-700"
+          >
+            https://github.com/DeepseaBandit/Notification-frontend.git
+          </a>
         </div>
       </div>
       
