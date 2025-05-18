@@ -309,6 +309,9 @@ export default function NotificationApp() {
         <span className="text-sm text-gray-500">
           Connected to API: {API_URL}
         </span>
+        <div className="text-sm text-gray-500 mt-1">
+          Made by Snehodeep Das Roll 22052768
+        </div>
       </div>
       
       {showNotification && currentNotification && (
