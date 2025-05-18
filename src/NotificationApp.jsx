@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-// Use environment variable with fallback to hardcoded API URL for production
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function NotificationApp() {
@@ -13,67 +12,55 @@ export default function NotificationApp() {
     inapp: []
   });
   
-  // Email form state
   const [emailForm, setEmailForm] = useState({
     email: "",
     subject: "",
     body: ""
   });
   
-  // SMS form state
   const [smsForm, setSmsForm] = useState({
     phoneNumber: "",
     message: ""
   });
   
-  // In-app notification form state
   const [inappForm, setInappForm] = useState({
     title: "",
     message: "",
     notification_type: "info"
   });
   
-  // State for notification display
   const [showNotification, setShowNotification] = useState(false);
   const [currentNotification, setCurrentNotification] = useState(null);
   
-  // Handle email form changes
   const handleEmailChange = (e) => {
     const { name, value } = e.target;
     setEmailForm(prev => ({ ...prev, [name]: value }));
   };
   
-  // Handle SMS form changes
   const handleSmsChange = (e) => {
     const { name, value } = e.target;
     setSmsForm(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle in-app form changes
   const handleInappChange = (e) => {
     const { name, value } = e.target;
     setInappForm(prev => ({ ...prev, [name]: value }));
   };
   
-  // Fetch notifications on component mount and when userId changes
   useEffect(() => {
     fetchNotifications();
   }, [userId]);
   
-  // Fetch all notifications
   const fetchNotifications = async () => {
     try {
-      // Fetch email notifications
       const emailRes = await fetch(`${API_URL}/email/users/${userId}/notifications`);
       if (!emailRes.ok) throw new Error(`Email API responded with status: ${emailRes.status}`);
       const emailData = await emailRes.json();
       
-      // Fetch SMS notifications
       const smsRes = await fetch(`${API_URL}/sms/logs/${userId}`);
       if (!smsRes.ok) throw new Error(`SMS API responded with status: ${smsRes.status}`);
       const smsData = await smsRes.json();
       
-      // Fetch in-app notifications
       const inappRes = await fetch(`${API_URL}/inapp/user/${userId}`);
       if (!inappRes.ok) throw new Error(`In-app API responded with status: ${inappRes.status}`);
       const inappData = await inappRes.json();
@@ -90,7 +77,6 @@ export default function NotificationApp() {
     }
   };
   
-  // Send email notification
   const sendEmail = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -116,7 +102,6 @@ export default function NotificationApp() {
       }
       
       const data = await response.json();
-      // Reset form and fetch updated notifications
       setEmailForm({ email: "", subject: "", body: "" });
       fetchNotifications();
       alert("Email sent successfully! Please check the spam folder of your email");
@@ -127,7 +112,6 @@ export default function NotificationApp() {
     }
   };
   
-  // Send SMS notification
   const sendSms = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -152,13 +136,10 @@ export default function NotificationApp() {
       }
       
       const data = await response.json();
-      // Reset form and fetch updated notifications
       setSmsForm({ phoneNumber: "", message: "" });
       fetchNotifications();
       
-      // Check if the SMS was actually sent (based on Twilio SID)
       if (!data.sid || data.sid === null) {
-        // Create a custom notification for SMS sending issues
         const smsNotification = {
           id: "sms-warning-" + Date.now(),
           title: "SMS Sending Issue",
@@ -171,7 +152,6 @@ export default function NotificationApp() {
         setCurrentNotification(smsNotification);
         setShowNotification(true);
         
-        // Auto hide the notification after 7 seconds
         setTimeout(() => {
           setShowNotification(false);
         }, 7000);
@@ -179,7 +159,6 @@ export default function NotificationApp() {
         alert("SMS sent successfully!");
       }
     } catch (error) {
-      // Show the Twilio error notification
       const errorNotification = {
         id: "sms-error-" + Date.now(),
         title: "SMS Sending Error",
@@ -192,7 +171,6 @@ export default function NotificationApp() {
       setCurrentNotification(errorNotification);
       setShowNotification(true);
       
-      // Auto hide the notification after 7 seconds
       setTimeout(() => {
         setShowNotification(false);
       }, 7000);
@@ -203,7 +181,6 @@ export default function NotificationApp() {
     }
   };
 
-  // Send in-app notification
   const sendInappNotification = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -231,22 +208,18 @@ export default function NotificationApp() {
       const result = await response.json();
       console.log("In-app notification created:", result);
       
-      // Update the notifications list directly with the new notification
       setNotifications(prev => ({
         ...prev,
         inapp: [result, ...prev.inapp]
       }));
       
-      // Show the toast notification
       setCurrentNotification(result);
       setShowNotification(true);
       
-      // Auto hide the notification after 5 seconds
       setTimeout(() => {
         setShowNotification(false);
       }, 5000);
       
-      // Reset form
       setInappForm({
         title: "",
         message: "",
@@ -260,7 +233,6 @@ export default function NotificationApp() {
     }
   };
 
-  // Mark in-app notification as read
   const markAsRead = async (notificationId) => {
     try {
       const response = await fetch(`${API_URL}/inapp/${notificationId}/mark-read`, {
@@ -275,7 +247,6 @@ export default function NotificationApp() {
         throw new Error(`Failed to mark notification as read: ${response.status}`);
       }
       
-      // Update notification in the state to avoid refetching
       setNotifications(prev => ({
         ...prev,
         inapp: prev.inapp.map(notif => 
@@ -283,7 +254,6 @@ export default function NotificationApp() {
         )
       }));
       
-      // Hide the toast if it's the current notification
       if (currentNotification && currentNotification.id === notificationId) {
         setShowNotification(false);
       }
@@ -292,7 +262,6 @@ export default function NotificationApp() {
     }
   };
 
-  // Mark all notifications as read for current user
   const markAllAsRead = async () => {
     try {
       const response = await fetch(`${API_URL}/inapp/user/${userId}/mark-all-read`, {
@@ -307,20 +276,17 @@ export default function NotificationApp() {
         throw new Error(`Failed to mark all notifications as read: ${response.status}`);
       }
       
-      // Update all notifications in the state to avoid refetching
       setNotifications(prev => ({
         ...prev,
         inapp: prev.inapp.map(notif => ({ ...notif, read: true }))
       }));
       
-      // Hide the toast notification
       setShowNotification(false);
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
   };
   
-  // Get notification type style
   const getNotificationTypeStyle = (type) => {
     switch (type) {
       case 'error':
@@ -339,14 +305,12 @@ export default function NotificationApp() {
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Notification System</h1>
       
-      {/* API Connection Status */}
       <div className="mb-4 text-center">
         <span className="text-sm text-gray-500">
           Connected to API: {API_URL}
         </span>
       </div>
       
-      {/* Toast Notification at the top center */}
       {showNotification && currentNotification && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md animate-fade-in">
           <div className={`border shadow-lg rounded-lg overflow-hidden ${getNotificationTypeStyle(currentNotification.notification_type)}`}>
@@ -393,7 +357,6 @@ export default function NotificationApp() {
         </div>
       )}
       
-      {/* User ID Selector */}
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">User ID:</label>
         <input
@@ -405,7 +368,6 @@ export default function NotificationApp() {
         />
       </div>
       
-      {/* Tab Navigation */}
       <div className="flex border-b mb-6">
         <button
           className={`px-4 py-2 ${activeTab === "email" ? "bg-blue-500 text-white" : "bg-gray-100"}`}
@@ -433,7 +395,6 @@ export default function NotificationApp() {
         </button>
       </div>
       
-      {/* Email Form */}
       {activeTab === "email" && (
         <div>
           <h2 className="text-xl font-semibold mb-4">Send Email Notification</h2>
@@ -487,8 +448,6 @@ export default function NotificationApp() {
         </div>
       )}
       
-      {/* Rest of your component remains the same */}
-      {/* SMS Form */}
       {activeTab === "sms" && (
         <div>
           <h2 className="text-xl font-semibold mb-4">Send SMS Notification</h2>
@@ -531,7 +490,6 @@ export default function NotificationApp() {
         </div>
       )}
 
-      {/* In-App Notification Form */}
       {activeTab === "inapp" && (
         <div>
           <h2 className="text-xl font-semibold mb-4">Send In-App Notification</h2>
@@ -589,7 +547,6 @@ export default function NotificationApp() {
         </div>
       )}
       
-      {/* Notification History */}
       {activeTab === "history" && (
         <div>
           <h2 className="text-xl font-semibold mb-4">Notification History</h2>
@@ -716,7 +673,6 @@ export default function NotificationApp() {
         </div>
       )}
       
-      {/* CSS for animation */}
       <style jsx>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translate(-50%, -20px); }
