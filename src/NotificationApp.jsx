@@ -119,7 +119,7 @@ export default function NotificationApp() {
       // Reset form and fetch updated notifications
       setEmailForm({ email: "", subject: "", body: "" });
       fetchNotifications();
-      alert("Email sent successfully!");
+      alert("Email sent successfully! Please check the spam folder of your email");
     } catch (error) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -155,8 +155,48 @@ export default function NotificationApp() {
       // Reset form and fetch updated notifications
       setSmsForm({ phoneNumber: "", message: "" });
       fetchNotifications();
-      alert("SMS sent successfully!");
+      
+      // Check if the SMS was actually sent (based on Twilio SID)
+      if (!data.sid || data.sid === null) {
+        // Create a custom notification for SMS sending issues
+        const smsNotification = {
+          id: "sms-warning-" + Date.now(),
+          title: "SMS Sending Issue",
+          message: "Please start the number with country code! If it still isn't working, your number may not be verified in Twilio",
+          notification_type: "warning",
+          read: false,
+          created_at: new Date().toISOString()
+        };
+        
+        setCurrentNotification(smsNotification);
+        setShowNotification(true);
+        
+        // Auto hide the notification after 7 seconds
+        setTimeout(() => {
+          setShowNotification(false);
+        }, 7000);
+      } else {
+        alert("SMS sent successfully!");
+      }
     } catch (error) {
+      // Show the Twilio error notification
+      const errorNotification = {
+        id: "sms-error-" + Date.now(),
+        title: "SMS Sending Error",
+        message: "Please start the number with country code! If it still isn't working, your number may not be verified in Twilio",
+        notification_type: "warning",
+        read: false,
+        created_at: new Date().toISOString()
+      };
+      
+      setCurrentNotification(errorNotification);
+      setShowNotification(true);
+      
+      // Auto hide the notification after 7 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 7000);
+      
       alert(`Error: ${error.message}`);
     } finally {
       setLoading(false);
